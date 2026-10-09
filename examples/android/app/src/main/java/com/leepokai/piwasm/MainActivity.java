@@ -34,7 +34,7 @@ public final class MainActivity extends Activity {
             return insets;
         });
         status = label("runtimeStatus"); result = label("runtimeResult"); proof = label("nativeProof");
-        run = button("Run task", view -> web.evaluateJavascript("document.getElementById('send').click()", null));
+        run = button("Run task", view -> web.evaluateJavascript("document.getElementById('prompt-form').requestSubmit()", null));
         button("Reopen WebView", view -> reopen());
         setContentView(layout);
         reopen();

@@ -18,6 +18,8 @@ final class RuntimeViewController: UIViewController, WKNavigationDelegate {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         status.accessibilityIdentifier = "runtimeStatus"
+        result.text = "No completed reply yet"
+        proof.text = "Native tool has not run yet"
         result.accessibilityIdentifier = "runtimeResult"
         proof.accessibilityIdentifier = "nativeProof"
         backgroundStatus.accessibilityIdentifier = "backgroundStatus"
@@ -47,7 +49,7 @@ final class RuntimeViewController: UIViewController, WKNavigationDelegate {
     }
     @objc private func runTask() {
         run.isEnabled = false; continued.isEnabled = false
-        webView?.evaluateJavaScript("document.getElementById('send').click()") { [weak self] _, error in
+        webView?.evaluateJavaScript("document.getElementById('prompt-form').requestSubmit()") { [weak self] _, error in
             if let error { self?.status.text = error.localizedDescription; self?.background.complete(success: false) }
         }
     }
