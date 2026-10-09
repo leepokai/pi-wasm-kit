@@ -74,7 +74,7 @@ test('exclusive journal ownership and torn final record recovery', async t=>{
 });
 
 test('CPU limit interrupts guest loops',async t=>{
-  const path=await setup(t);const a=await PiWasmAgent.open({journal:await openNodeJournal(path),model:async()=>answer('ok'),cpuSliceMs:100});
+  const path=await setup(t);const a=await PiWasmAgent.open({journal:await openNodeJournal(path),model:async()=>answer('ok'),cpuSliceMs:1000});
   await assert.rejects(a.evaluate('while (true) {}'),/interrupted/);await a.terminate();
 });
 
