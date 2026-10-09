@@ -1,0 +1,11 @@
+pi-wasm-kit is an independent project by leepokai.
+
+Inspired by Finn Voorhees's PiDurableKit:
+https://github.com/finnvoor/PiDurableKit
+PiDurableKit demonstrates embedding Pi Durable in a host runtime with native
+capability bridges and an idiomatic API. This project applies that approach to
+QuickJS WebAssembly and JavaScript hosts. No affiliation or endorsement is implied.
+
+Powered by Earendil Works' Pi Durable, Pi AI, and Chord (MIT), and
+QuickJS / quickjs-emscripten (MIT). Upstream runtime code is bundled at build time,
+not reimplemented. Third-party license texts are distributed in dist/licenses.

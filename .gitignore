@@ -1,0 +1,15 @@
+node_modules/
+dist/
+src/guest-source.ts
+playwright-report/
+test-results/
+.data/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+
+demo-dist/
+
+*.tgz

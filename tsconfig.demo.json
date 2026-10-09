@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","compilerOptions":{"rootDir":".","noEmit":true,"module":"ESNext","moduleResolution":"Bundler"},"include":["examples/browser/**/*.ts","test/browser/**/*.ts","vite.config.ts","playwright.config.ts"]}

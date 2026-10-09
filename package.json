@@ -1,0 +1,77 @@
+{
+  "name": "pi-wasm-kit",
+  "version": "0.1.0",
+  "description": "Pi Durable inside a QuickJS WebAssembly sandbox, with browser and Node hosts.",
+  "scripts": {
+    "build": "node scripts/build.mjs && tsc",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.demo.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "test:e2e": "playwright test",
+    "check": "npm test && npm run typecheck && npm run build:demo && npm run test:e2e",
+    "prepack": "npm run build",
+    "build:demo": "npm run build && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test:package": "node scripts/package-smoke.mjs"
+  },
+  "keywords": [
+    "pi",
+    "durable",
+    "wasm",
+    "quickjs",
+    "agents",
+    "browser"
+  ],
+  "author": "leepokai",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@earendil-works/chord": "1.1.0",
+    "@earendil-works/pi-ai": "1.1.0",
+    "@earendil-works/pi-durable": "1.1.0",
+    "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
+    "abort-controller": "3.0.0",
+    "quickjs-emscripten-core": "0.32.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@types/node": "26.6.4",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/storage/node.d.ts",
+      "import": "./dist/storage/node.js"
+    },
+    "./browser": {
+      "types": "./dist/storage/browser.d.ts",
+      "import": "./dist/storage/browser.js"
+    },
+    "./openai": {
+      "types": "./dist/providers/openai.d.ts",
+      "import": "./dist/providers/openai.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leepokai/pi-wasm-kit.git"
+  },
+  "homepage": "https://github.com/leepokai/pi-wasm-kit#readme",
+  "bugs": {
+    "url": "https://github.com/leepokai/pi-wasm-kit/issues"
+  }
+}
