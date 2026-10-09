@@ -3,6 +3,7 @@ import XCTest
 @MainActor
 final class RuntimeUITests: XCTestCase {
     func testNativeToolAndJournalSurviveAppRelaunch() {
+        continueAfterFailure = false
         let app = XCUIApplication()
         app.launch()
         let run = app.buttons["runTask"]
@@ -27,6 +28,8 @@ final class RuntimeUITests: XCTestCase {
     private func wait(_ element: XCUIElement, contains value: String) {
         let predicate = NSPredicate(format: "label CONTAINS %@", value)
         let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        XCTAssertEqual(XCTWaiter.wait(for: [expectation], timeout: 30), .completed)
+        let outcome = XCTWaiter.wait(for: [expectation], timeout: 30)
+        if outcome != .completed { print(XCUIApplication().debugDescription) }
+        XCTAssertEqual(outcome, .completed)
     }
 }

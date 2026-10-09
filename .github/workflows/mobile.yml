@@ -1,5 +1,9 @@
 name: Mobile examples
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore: ["**/*.md", "docs/**", "logos/**"]
+  pull_request:
+    paths-ignore: ["**/*.md", "docs/**", "logos/**"]
 permissions:
   contents: read
 jobs:

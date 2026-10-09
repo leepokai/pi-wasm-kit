@@ -51,6 +51,7 @@ Install Node.js and Git. These commands work in a macOS/Linux terminal or Window
 git clone https://github.com/leepokai/pi-wasm-kit.git
 cd pi-wasm-kit
 npm ci
+npm run build
 npm run dev
 ```
 
