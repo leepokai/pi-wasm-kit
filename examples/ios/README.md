@@ -1,5 +1,7 @@
 # iOS example
 
+[Platform installation guide](../../docs/install.md#ios) · [Runtime and background behavior](../../docs/mobile.md)
+
 Swift 6, iOS 26+, Xcode 26+ and [XcodeGen](https://github.com/yonaskolb/XcodeGen). A SwiftUI shell hosts WKWebView, the actual WASM runtime, IndexedDB, and a Swift multiply tool. The icon is the project's Continuation π mark.
 
 Start the shared [asset server](../../docs/mobile.md#run-the-shared-assets), then from the repository root:

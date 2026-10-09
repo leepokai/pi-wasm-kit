@@ -4,7 +4,7 @@
 <h1 align="center">Pi WASM Kit</h1>
 <p align="center"><strong>Durable agents. A portable runtime.</strong><br>Run Pi in WebAssembly. Pick up from the last committed checkpoint.</p>
 <p align="center">
-  <a href="#try-it">Quick start</a> · <a href="docs/api.md">API</a> · <a href="docs/features.md">Features</a> · <a href="docs/mobile.md">Mobile guide</a> · <a href="https://github.com/leepokai/pi-wasm-kit/releases">Releases</a>
+  <a href="docs/install.md">Install</a> · <a href="#try-it">Quick start</a> · <a href="docs/api.md">API</a> · <a href="docs/features.md">Features</a> · <a href="docs/mobile.md">Mobile guide</a> · <a href="https://github.com/leepokai/pi-wasm-kit/releases">Releases</a>
 </p>
 <p align="center">
   <a href="https://github.com/leepokai/pi-wasm-kit/releases"><img alt="Download SDK" src="https://img.shields.io/badge/DOWNLOAD-SDK-91ad60?style=for-the-badge&labelColor=22271f"></a>
@@ -35,6 +35,21 @@ The **actual upstream Pi Durable engine** runs inside QuickJS WASM. The host sup
 **Experimental, v0.2.** Browser and Node hosts, plus [iOS and Android WebView examples](docs/mobile.md). Mobile examples run the same WASM engine on-device and call an actual Swift/Java tool. They load assets from a development server; they are not standalone offline apps. PostgreSQL and standalone WASI execution are not implemented.
 
 This is an independent project inspired by PiDurableKit’s Apple embedding design, not an official port or an endorsed project. PiDurableKit uses JavaScriptCore; this project uses QuickJS compiled to WebAssembly.
+
+## Install
+
+| Platform | Get started |
+| --- | --- |
+| macOS / Windows / Linux · Node.js | [Install the SDK tarball](docs/install.md#nodejs-sdk) |
+| Browser | [Run the playground](docs/install.md#browser-playground) |
+| iOS 26+ | [Build the Swift example](docs/install.md#ios) on macOS |
+| Android API 26+ | [Build and install the Android example](docs/install.md#android) |
+
+```sh
+npm install https://github.com/leepokai/pi-wasm-kit/releases/download/v0.2.0/pi-wasm-kit-0.2.0.tgz
+```
+
+Requires Node.js 22.19+. This installs an SDK in your application, not a desktop/mobile app or a global CLI. See the [platform installation guide](docs/install.md) for prerequisites, Windows PowerShell commands, device setup and checksums.
 
 ## Try it
 

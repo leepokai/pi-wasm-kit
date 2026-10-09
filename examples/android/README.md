@@ -1,5 +1,7 @@
 # Android example
 
+[Platform installation guide](../../docs/install.md#android) · [Runtime and background behavior](../../docs/mobile.md)
+
 Java, Android API 26+, compile/target SDK 35, JDK 17+ and an updated Android System WebView supporting `WEB_MESSAGE_LISTENER`. The wrapper uses an origin-scoped AndroidX bridge and persistent WebView storage. Pi/QuickJS WASM executes on the Android device.
 
 Start the [shared asset server](../../docs/mobile.md#run-the-shared-assets). Set `ANDROID_HOME` to your SDK, start an emulator or connect your own debug device, then:
