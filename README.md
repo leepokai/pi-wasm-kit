@@ -13,6 +13,7 @@
 </p>
 <p align="center">
   <a href="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/leepokai/pi-wasm-kit/actions/workflows/mobile.yml"><img alt="Mobile examples CI" src="https://github.com/leepokai/pi-wasm-kit/actions/workflows/mobile.yml/badge.svg"></a>
   <a href="https://github.com/leepokai/pi-wasm-kit/releases"><img alt="Release including experimental prereleases" src="https://img.shields.io/github/v/release/leepokai/pi-wasm-kit?include_prereleases&color=627d3c"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/leepokai/pi-wasm-kit?color=627d3c"></a>
   <a href="https://github.com/leepokai/pi-wasm-kit/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/leepokai/pi-wasm-kit?style=flat&color=627d3c"></a>
