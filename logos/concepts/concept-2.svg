@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Pi WASM Kit — Resume</title>
+  <desc id="desc">Saved checkpoint blocks continue into a forward-facing arrow.</desc>
+  <rect width="512" height="512" rx="112" fill="#22271f"/>
+  <g id="icon">
+    <rect x="96" y="144" width="72" height="96" rx="12" fill="#f5f4ef"/>
+    <rect x="96" y="272" width="72" height="96" rx="12" fill="#f5f4ef"/>
+    <path d="M212 131 Q212 118 223 125 L407 246 Q421 256 407 266 L223 387 Q212 394 212 381 Z" fill="#91ad60"/>
+  </g>
+</svg>

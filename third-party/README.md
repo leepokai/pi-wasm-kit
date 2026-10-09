@@ -6,3 +6,5 @@ The Earendil Works 1.1.0 npm packages declare MIT but omit their license files. 
 https://github.com/earendil-works/pi/blob/eba849739511223c51a62bbd7e3f1c00f99fb1d0/LICENSE
 
 PiDurableKit is credited as inspiration in README, NOTICE and the playground. Its Swift code is not included in this project. All upstream names are credited to their respective authors; no affiliation or endorsement is implied.
+
+The generated Gradle wrapper in `examples/android` is from Gradle 8.14.3 and is Apache-2.0 licensed; see [its license](gradle/LICENSE). AndroidX libraries are fetched by Gradle and keep their own license notices. They are not bundled into the npm SDK tarball.

@@ -1,6 +1,6 @@
 {
   "name": "pi-wasm-kit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Pi Durable inside a QuickJS WebAssembly sandbox, with browser and Node hosts.",
   "scripts": {
     "build": "node scripts/build.mjs && tsc",

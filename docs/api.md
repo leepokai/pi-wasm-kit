@@ -21,6 +21,19 @@
 
 Configuration accepts arrays of registered extension/tool names. Advanced upstream add/remove/null configuration is available through guest `conversation.configure`. The root uses provider `host` and `modelId` (default `host-model`). The bundled host catalog contains one model; changing the ID to an unregistered model does not automatically add a provider. A custom model handler may route requests itself.
 
+## Paused recovery
+
+`open({ autoResume: false, ... })` loads the journal without starting the scheduler. Use this when the host has saved a cancellation intent before a process stops:
+
+```ts
+const agent = await PiWasmAgent.open({ journal, model, autoResume: false });
+await agent.abort(undefined, true); // Commit cancellation of root and its background work.
+// Acknowledge the host cancellation marker only after this commit succeeds.
+await agent.resume();
+```
+
+Default `autoResume: true` resumes unfinished work automatically. Paused instances can read state and admit changes; waits require scheduling to resume. This cancels the root conversation; applications with multiple conversations must apply their own cancellation scope.
+
 ## Tasks, extensions and lifecycle
 
 | Method | Behavior |
@@ -32,6 +45,7 @@ Configuration accepts arrays of registered extension/tool names. Advanced upstre
 | `install(source)` | Install/replace a CommonJS extension; returns name |
 | `uninstall(name)` | Remove live registration; does not rewrite historical records |
 | `evaluate(source, args?, conversationId?)` | Execute trusted async guest function body, return JSON |
+| `resume()` | Start scheduling after a paused open |
 | `close()` | Graceful close and journal release |
 | `terminate()` | Dispose VM abruptly, abort host effects and release journal |
 

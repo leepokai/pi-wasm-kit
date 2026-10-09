@@ -28,10 +28,12 @@ export class PiWasmAgent {
           default: throw new Error(`Capability not granted: ${method}`);
         }
       }, emit, options.cpuSliceMs, options.memoryLimitBytes);
-      const opened = await engine.call<{ conversationId: number }>('open', { tools: (options.tools ?? []).map(({ execute, ...definition }) => definition), instructions: options.instructions, modelId: options.modelId, contextWindow: options.contextWindow, extensions: options.extensions, settings: options.settings, events: !!options.onEvent });
+      const opened = await engine.call<{ conversationId: number }>('open', { tools: (options.tools ?? []).map(({ execute, ...definition }) => definition), instructions: options.instructions, modelId: options.modelId, contextWindow: options.contextWindow, extensions: options.extensions, settings: options.settings, events: !!options.onEvent, autoResume: options.autoResume });
       return new PiWasmAgent(engine, options, opened.conversationId);
     } catch (error) { await engine?.dispose(); await options.journal.close(); throw error; }
   }
+  /** Start scheduling after opening with autoResume: false. */
+  resume() { return this.engine.call<void>('resume', {}); }
   submit(content: UserInput, requestId = crypto.randomUUID(), options: { conversationId?: number; whenBusy?: 'steer' | 'followUp' | 'reject' } = {}) {
     return this.submitDraft({ type: 'input', content, requestId, whenBusy: options.whenBusy }, options.conversationId);
   }

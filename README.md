@@ -1,16 +1,39 @@
-# Pi WASM Kit
-
-**Pi Durable inside WebAssembly. Browser and Node.js hosts.**
-
-Inspired by [Finn Voorhees’s PiDurableKit](https://github.com/finnvoor/PiDurableKit), which embeds Pi Durable in Apple apps with native capability bridges. Pi WASM Kit explores the same idea using QuickJS compiled to WebAssembly, with a TypeScript host API. This is an independent project, not an official port or an endorsed project.
-
-[![CI](https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml)
+<p align="center">
+  <img src="logos/export/logo-192.png" width="112" height="112" alt="Pi WASM Kit — continuation pi icon">
+</p>
+<h1 align="center">Pi WASM Kit</h1>
+<p align="center"><strong>Durable agents. A portable runtime.</strong><br>Run Pi in WebAssembly. Pick up from the last committed checkpoint.</p>
+<p align="center">
+  <a href="#try-it">Quick start</a> · <a href="docs/api.md">API</a> · <a href="docs/features.md">Features</a> · <a href="docs/mobile.md">Mobile guide</a> · <a href="https://github.com/leepokai/pi-wasm-kit/releases">Releases</a>
+</p>
+<p align="center">
+  <a href="https://github.com/leepokai/pi-wasm-kit/releases"><img alt="Download SDK" src="https://img.shields.io/badge/DOWNLOAD-SDK-91ad60?style=for-the-badge&labelColor=22271f"></a>
+  <a href="examples/ios"><img alt="iOS example" src="https://img.shields.io/badge/iOS-EXAMPLE-91ad60?style=for-the-badge&logo=apple&logoColor=white&labelColor=22271f"></a>
+  <a href="examples/android"><img alt="Android example" src="https://img.shields.io/badge/ANDROID-EXAMPLE-91ad60?style=for-the-badge&logo=android&logoColor=white&labelColor=22271f"></a>
+</p>
+<p align="center">
+  <a href="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/leepokai/pi-wasm-kit/releases"><img alt="Release including experimental prereleases" src="https://img.shields.io/github/v/release/leepokai/pi-wasm-kit?include_prereleases&color=627d3c"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/leepokai/pi-wasm-kit?color=627d3c"></a>
+  <a href="https://github.com/leepokai/pi-wasm-kit/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/leepokai/pi-wasm-kit?style=flat&color=627d3c"></a>
+</p>
+<p align="center">
+  <img alt="WebAssembly runtime" src="https://img.shields.io/badge/runtime-WebAssembly-654ff0?logo=webassembly&logoColor=white">
+  <img alt="Node.js 22.19 or newer" src="https://img.shields.io/badge/Node.js-22.19%2B-5f843d?logo=nodedotjs&logoColor=white">
+  <img alt="Browser IndexedDB storage" src="https://img.shields.io/badge/browser-IndexedDB-627d3c">
+  <img alt="iOS example requires iOS 26 or newer" src="https://img.shields.io/badge/iOS_example-26%2B-555?logo=apple&logoColor=white">
+  <img alt="Android example minimum API 26" src="https://img.shields.io/badge/Android_example-API_26%2B-627d3c?logo=android&logoColor=white">
+</p>
+<p align="center">Open source · MIT licensed · Experimental<br>
+Inspired by <a href="https://github.com/finnvoor/PiDurableKit">PiDurableKit</a> by <a href="https://github.com/finnvoor">Finn Voorhees</a>.</p>
 
 ![Browser playground](docs/playground.png)
 
 The **actual upstream Pi Durable engine** runs inside QuickJS WASM. The host supplies a model transport, an exclusive durable journal, and explicitly granted tools. Stop the process or terminate the Worker, reopen the same journal, and Pi resumes unfinished tasks from committed checkpoints.
 
-**Experimental, v0.1.** Browser and Node are tested. Native Android/iOS, standalone WASI, and PostgreSQL execution are not implemented. A mobile Chromium viewport test is not an Android device test.
+**Experimental, v0.2.** Browser and Node hosts, plus [iOS and Android WebView examples](docs/mobile.md). Mobile examples run the same WASM engine on-device and call an actual Swift/Java tool. They load assets from a development server; they are not standalone offline apps. PostgreSQL and standalone WASI execution are not implemented.
+
+This is an independent project inspired by PiDurableKit’s Apple embedding design, not an official port or an endorsed project. PiDurableKit uses JavaScriptCore; this project uses QuickJS compiled to WebAssembly.
 
 ## Try it
 
@@ -32,6 +55,13 @@ Open the local URL. The demo uses a **deterministic local model**, not an LLM: e
 4. Refresh the page. The saved conversation remains.
 
 Optionally enter an OpenAI Chat Completions-compatible endpoint and model in **Model connection**, then interrupt and reopen. The endpoint must allow your origin through CORS. Use your own authenticated backend proxy; this demo has no login and does not store API keys. The endpoint and model selection are retained in localStorage so refreshing uses the same transport.
+
+## Mobile examples
+
+- **[iOS / Swift](examples/ios)** — WKWebView, native tool, app-relaunch recovery, and iOS 26+ `BGContinuedProcessingTask`.
+- **[Android / Java](examples/android)** — Android WebView, origin-scoped native tool, process-restart recovery.
+
+The [mobile guide](docs/mobile.md) explains asset hosting, platform limits, and how to reproduce the native E2E checks. Background execution is separate from durability: a saved task can survive an interruption without receiving more background CPU time.
 
 ## Node example with a real model
 
@@ -107,7 +137,8 @@ The goal is to retain Pi’s capabilities rather than replace its scheduler with
 | JS extensions, tools, prompt sections, hooks and wrappers | CommonJS extension sources inside WASM |
 | Documents, transactions, custom/child tasks and subagents | Upstream API inside extensions and `evaluate` |
 | Apple Keychain, OAuth helpers, native filesystem/shell | Host integration required; not bundled |
-| Android / iOS app integration | WebView integration is a possible next step; not device-tested |
+| Android / iOS app integration | Origin-scoped native tool bridges, persistent WebView journals; [examples](docs/mobile.md) |
+| iOS continued background processing | iOS 26+ adapter, progress, expiration and durable cancellation; device scheduling remains system-controlled |
 
 ## Extensions and advanced Pi APIs
 

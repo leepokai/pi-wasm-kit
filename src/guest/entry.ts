@@ -65,11 +65,12 @@ async function open(config: any) {
   harness = await pi.Harness.open(await JournalStorage.open(), { models, registry, settings: config.settings, onReport: error => __emit(JSON.stringify({ type: 'error', message: String(error) })) }, context);
   root = await harness.root(context, { agent: { model: { provider: 'host', modelId: config.modelId ?? 'host-model' }, instructions: config.instructions ?? 'You are a helpful assistant.' } });
   if (config.events) await watch(root.id);
-  harness.resume();
+  if (config.autoResume !== false) harness.resume();
   return { conversationId: root.id };
 }
 const api: Record<string, (args: any) => Promise<unknown>> = {
   open,
+  resume: async () => { harness.resume(); return null; },
   submit: async args => ({ id: (await (await conversation(args)).submit(args.submission, context)).id }),
   wait: async args => { const submission = await harness.submission(args.id, context); if (!submission) throw new Error('Submission not found'); return submission.wait(context); },
   view: async args => { const state = await (await conversation(args)).viewState(context); try { return state.value; } finally { state.dispose(); } },

@@ -25,7 +25,8 @@ This is inspired by PiDurableKit, not API-compatible with its Swift types. It em
 | SQLite | Replaced by exclusive JSONL/IndexedDB journals | No SQLite compatibility or import from PiDurableKit journals |
 | OAuth / Keychain / provider catalog | Supply host transport and credential management | No Apple OAuth UI or secret store bundled |
 | Shell / filesystem / environment | Explicit host tools | No built-in shell, filesystem or `ExecutionEnv` implementation |
-| Android / iOS | Possible WebView adaptation | No native adapters or physical device validation |
+| Android / iOS | WKWebView and Android WebView with native multiply tool | Simulator/emulator recovery E2E; local asset server; no physical device validation |
+| iOS continued processing | `BGContinuedProcessingTask`, progress, expiry and cancel-before-resume | Swift lifecycle tests + WASM cancellation regression; OS background grants require physical device testing |
 | PostgreSQL / WASI | Not implemented | Current WASM artifact needs JavaScript host glue |
 
 `view().docs` mounts Pi’s agent/live/inbox/provider/usage documents, as upstream does. Custom documents are read with `harness.snapshot()` in guest code, not automatically included in `view()`.

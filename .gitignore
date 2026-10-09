@@ -13,3 +13,10 @@ test-results/
 demo-dist/
 
 *.tgz
+
+# Native examples
+**/build/
+**/.gradle/
+**/local.properties
+**/*.xcodeproj/
+**/*.xcresult/

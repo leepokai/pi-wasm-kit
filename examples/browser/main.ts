@@ -1,3 +1,4 @@
+import { hasNativeHost, nativeCall } from './native.js';
 import type { AgentView } from '../../src/types.js';
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 const savedConnection = JSON.parse(localStorage.getItem('pi-wasm-kit:connection') ?? '{}');
@@ -30,9 +31,16 @@ function render(view: AgentView) {
 async function refresh() {
   if (!worker) return;
   try {
-    render(await call('view'));
+    const view: AgentView = await call('view');
+    render(view);
     const state = await call('inspect');
-    status(state.tasks.length ? 'Running · progress saved' : 'Ready · progress saved');
+    const current = state.tasks.length ? 'Running · progress saved' : 'Ready · progress saved';
+    status(current);
+    if (hasNativeHost) {
+      const messages = view.entries.flatMap(entry => entry.model ?? []);
+      const text = (message: any) => typeof message?.content === 'string' ? message.content : (message?.content ?? []).filter((block: any) => block.type === 'text').map((block: any) => block.text).join('');
+      await nativeCall('state', { status: current, summary: `${text([...messages].reverse().find(message => message.role === 'assistant'))} · replies: ${messages.filter(message => message.role === 'assistant' && text(message)).length}`, proof: text([...messages].reverse().find(message => message.role === 'toolResult')), busy: state.tasks.length > 0 });
+    }
   } catch (e) { if (worker) error(e); }
 }
 async function open() {
@@ -40,8 +48,12 @@ async function open() {
   $('reopen') .setAttribute('disabled', '');
   worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
   worker.onerror = e => { error(e.message); interrupt(); };
+  const owner = worker;
   worker.onmessage = ({ data }) => {
-    if (data.event) {
+    if (data.nativeRequest) {
+      const { id, args } = data.nativeRequest;
+      void nativeCall('multiply', args).then(result => owner.postMessage({ nativeReply: { id, result } }), error => owner.postMessage({ nativeReply: { id, error: String(error) } }));
+    } else if (data.event) {
       if (data.event.type === 'commit') $('seq').textContent = String(data.event.seq);
       if (data.event.type === 'error') error(data.event.message);
       if (!refreshTimer) refreshTimer = setTimeout(() => { refreshTimer = undefined; void refresh(); }, 100);
@@ -52,9 +64,11 @@ async function open() {
     const endpoint = $<HTMLInputElement>('endpoint').value.trim(), model = $<HTMLInputElement>('model').value.trim();
     if (!!endpoint !== !!model) throw new Error('Enter both endpoint and model, or leave both empty for the local demo.');
     localStorage.setItem('pi-wasm-kit:connection', JSON.stringify({ endpoint, model }));
-    const info = await call('open', { endpoint, model });
+    const configuration = hasNativeHost ? await nativeCall('configuration') : {};
+    const info = await call('open', { endpoint, model, nativeTools: hasNativeHost, cancelOnOpen: !!configuration.cancelOnOpen });
+    if (configuration.cancelOnOpen) await nativeCall('cancelAcknowledged');
     $('conversation').textContent = String(info.conversationId);
-    $('mode').textContent = endpoint ? 'CONNECTED MODEL' : 'LOCAL DEMO MODEL';
+    $('mode').textContent = endpoint ? 'CONNECTED MODEL' : hasNativeHost ? 'DEMO MODEL · NATIVE TOOL' : 'LOCAL DEMO MODEL';
     for (const id of ['send', 'interrupt', 'cancel']) $(id).removeAttribute('disabled');
     await refresh();
   } catch (e) { error(e); interrupt(); }
@@ -67,7 +81,7 @@ function interrupt() {
   for (const id of ['send', 'interrupt', 'cancel']) $(id).setAttribute('disabled', '');
   $('reopen').removeAttribute('disabled');
 }
-$('prompt-form').onsubmit = async event => { event.preventDefault(); $('error').textContent = ''; try { status('Running…'); await call('submit', { text: $<HTMLInputElement>('prompt').value }); await refresh(); } catch (e) { if (worker) error(e); } };
+$('prompt-form').onsubmit = async event => { event.preventDefault(); $('error').textContent = ''; try { status('Running…'); const settled = await call('submit', { text: $<HTMLInputElement>('prompt').value }); if (hasNativeHost) await nativeCall('completed', { success: settled.status === 'done' }); await refresh(); } catch (e) { if (worker) error(e); if (hasNativeHost) void nativeCall('completed', { success: false }).catch(error); } };
 $('interrupt').onclick = interrupt;
 $('reopen').onclick = () => void open();
 $('cancel').onclick = () => { void call('abort').then(refresh).catch(error); };

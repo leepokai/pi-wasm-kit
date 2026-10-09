@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Pi WASM Kit — Continuation</title>
+  <desc id="desc">A bold geometric pi with a diagonal pause in its right stem, continuing in olive green.</desc>
+  <rect width="512" height="512" fill="#22271f"/>
+  <g id="icon">
+    <path fill="#f5f4ef" d="M100 128H412V200H352V262L280 286V200H224L204 392H132L152 200H100Z"/>
+    <path fill="#91ad60" d="M280 322L352 298V316C352 350 366 360 392 360H412V392H364C308 392 280 369 280 322Z"/>
+  </g>
+</svg>

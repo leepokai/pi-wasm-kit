@@ -161,3 +161,25 @@ test('guest tool creates and waits for an owned subagent conversation',async t=>
   const child=tool.model[0].details.child;assert.match(JSON.stringify(await a.view(child)),/child answer/);
   const graph=JSON.stringify(await a.taskGraph());assert(graph.length>2);await a.close();
 });
+
+test('paused recovery admits cancellation before model replay, then accepts fresh work', async t => {
+  const path = await setup(t); let started = false;
+  const first = await PiWasmAgent.open({ journal: await openNodeJournal(path), model: (_req, signal) => new Promise((_resolve, reject) => {
+    started = true;
+    signal.addEventListener('abort', () => reject(new Error('stopped')), { once: true });
+  }) });
+  await first.submit('cancel this after restart'); await until(() => started);
+  await first.terminate();
+  let calls = 0;
+  const restored = await PiWasmAgent.open({ journal: await openNodeJournal(path), autoResume: false, model: async () => { calls++; return answer('fresh work'); } });
+  await new Promise(resolve => setTimeout(resolve, 100));
+  assert.equal(calls, 0);
+  await restored.abort(undefined, true);
+  await restored.resume();
+  await until(async () => !(await restored.inspect()).tasks.length);
+  assert.equal(calls, 0, 'cancelled work must not invoke a model after recovery');
+  const fresh = await restored.submit('new request');
+  assert.equal((await restored.wait(fresh.id)).status, 'done');
+  assert.equal(calls, 1);
+  await restored.close();
+});

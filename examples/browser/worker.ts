@@ -17,12 +17,33 @@ async function journal() {
   const store = await openBrowserJournal('playground-v1');
   return { ...store, async load() { const commits = await store.load(); self.postMessage({ event: { type: 'commit', seq: commits.at(-1)?.seq ?? 0 } }); return commits; } };
 }
+let nativeId = 1;
+const nativePending = new Map<number, { resolve(value: any): void; reject(error: Error): void }>();
+async function nativeMultiply(args: unknown, signal: AbortSignal) {
+  signal.throwIfAborted();
+  const id = nativeId++;
+  let cancel!: () => void;
+  try {
+    return await new Promise<any>((resolve, reject) => {
+      cancel = () => reject(new Error('Native tool cancelled'));
+      nativePending.set(id, { resolve, reject });
+      signal.addEventListener('abort', cancel, { once: true });
+      self.postMessage({ nativeRequest: { id, args } });
+    });
+  } finally { signal.removeEventListener('abort', cancel); nativePending.delete(id); }
+}
 let agent: PiWasmAgent | undefined;
 self.onmessage = async ({ data }) => {
+  if (data.nativeReply) {
+    const reply = data.nativeReply, waiter = nativePending.get(reply.id);
+    if (reply.error) waiter?.reject(new Error(reply.error)); else waiter?.resolve(reply.result);
+    return;
+  }
   try {
     let value: unknown;
     if (data.method === 'open') {
-      agent = await PiWasmAgent.open({ journal: await journal(), model: data.endpoint ? openAICompatible({ baseURL: data.endpoint, model: data.model }) : demo, tools: [{ name: 'multiply', description: 'Multiply two numbers', parameters: { type: 'object', properties: { a: { type: 'number' }, b: { type: 'number' } }, required: ['a', 'b'] }, replay: 'safe', execute: ({ a, b }, ctx) => { ctx.output('Multiplying…'); return String(Number(a) * Number(b)); } }], onEvent: event => self.postMessage({ event }) });
+      agent = await PiWasmAgent.open({ journal: await journal(), autoResume: !data.cancelOnOpen, model: data.endpoint ? openAICompatible({ baseURL: data.endpoint, model: data.model }) : demo, tools: [{ name: 'multiply', description: 'Multiply two numbers', parameters: { type: 'object', properties: { a: { type: 'number' }, b: { type: 'number' } }, required: ['a', 'b'] }, replay: 'safe', execute: async ({ a, b }, ctx) => { ctx.output('Multiplying…'); if (data.nativeTools) { const result = await nativeMultiply({ a, b }, ctx.signal); return `${result.value} (${result.platform} native tool)`; } return String(Number(a) * Number(b)); } }], onEvent: event => self.postMessage({ event }) });
+      if (data.cancelOnOpen) { await agent.abort(undefined, true); await agent.resume(); }
       value = { conversationId: agent.conversationId };
     } else {
       if (!agent) throw new Error('Runtime is not open');

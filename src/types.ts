@@ -26,6 +26,8 @@ export interface AgentOptions {
   /** CommonJS sources exporting Pi extensions. Reinstall the same definitions on recovery. */
   extensions?: string[];
   settings?: Omit<HarnessSettings, 'extensions'>;
+  /** Open without scheduling persisted work, e.g. to admit a cancellation before recovery. */
+  autoResume?: boolean;
   instructions?: string;
   modelId?: string;
   contextWindow?: number;
