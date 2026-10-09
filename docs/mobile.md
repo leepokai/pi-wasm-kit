@@ -1,6 +1,6 @@
 # Mobile runtime examples
 
-[Swift / iOS](../examples/ios) and [Java / Android](../examples/android) embed the same production browser build. The bridge is deliberately small: a demo model asks the real Pi engine to multiply 21 × 2, and a native method returns 42. No model API credential is required.
+[Swift / iOS](../examples/ios) and [Java / Android](../examples/android) embed the same production browser build. The bridge is deliberately small: a demo model asks the real Pi engine to multiply 21 × 2, and a native method returns 42. No model API credential is required. The demo allows a 10-second guest CPU slice for startup on slower WebViews; the SDK default remains one second. The guest runs in a Worker, which the host can terminate independently.
 
 ```mermaid
 flowchart LR

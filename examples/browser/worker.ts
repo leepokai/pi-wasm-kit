@@ -42,7 +42,8 @@ self.onmessage = async ({ data }) => {
   try {
     let value: unknown;
     if (data.method === 'open') {
-      agent = await PiWasmAgent.open({ journal: await journal(), autoResume: !data.cancelOnOpen, model: data.endpoint ? openAICompatible({ baseURL: data.endpoint, model: data.model }) : demo, tools: [{ name: 'multiply', description: 'Multiply two numbers', parameters: { type: 'object', properties: { a: { type: 'number' }, b: { type: 'number' } }, required: ['a', 'b'] }, replay: 'safe', execute: async ({ a, b }, ctx) => { ctx.output('Multiplying…'); if (data.nativeTools) { const result = await nativeMultiply({ a, b }, ctx.signal); return `${result.value} (${result.platform} native tool)`; } return String(Number(a) * Number(b)); } }], onEvent: event => self.postMessage({ event }) });
+      agent = await PiWasmAgent.open({ // Allow trusted guest startup on slower WebViews; Worker termination remains immediate.
+        journal: await journal(), cpuSliceMs: 10_000, autoResume: !data.cancelOnOpen, model: data.endpoint ? openAICompatible({ baseURL: data.endpoint, model: data.model }) : demo, tools: [{ name: 'multiply', description: 'Multiply two numbers', parameters: { type: 'object', properties: { a: { type: 'number' }, b: { type: 'number' } }, required: ['a', 'b'] }, replay: 'safe', execute: async ({ a, b }, ctx) => { ctx.output('Multiplying…'); if (data.nativeTools) { const result = await nativeMultiply({ a, b }, ctx.signal); return `${result.value} (${result.platform} native tool)`; } return String(Number(a) * Number(b)); } }], onEvent: event => self.postMessage({ event }) });
       if (data.cancelOnOpen) { await agent.abort(undefined, true); await agent.resume(); }
       value = { conversationId: agent.conversationId };
     } else {

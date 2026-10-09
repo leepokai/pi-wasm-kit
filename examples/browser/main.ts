@@ -9,7 +9,11 @@ let nextId = 1;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 const pending = new Map<number, { resolve(value: any): void; reject(error: Error): void }>();
 const status = (text: string) => { $('status').textContent = text; };
-const error = (reason: unknown) => { $('error').textContent = reason instanceof Error ? reason.message : String(reason); };
+const error = (reason: unknown) => {
+  const message = reason instanceof Error ? reason.message : String(reason);
+  $('error').textContent = message;
+  if (hasNativeHost) void nativeCall('state', { status: `Error: ${message}`, summary: '', proof: '', busy: true }).catch(console.error);
+};
 function call(method: string, args = {}) {
   if (!worker) return Promise.reject(new Error('Runtime is interrupted'));
   const id = nextId++;
