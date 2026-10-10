@@ -64,9 +64,9 @@ jobs:
         run: |
           if [ "$DRY_RUN" = "true" ]; then
             npm whoami
-            npm publish "release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --dry-run
+            npm publish "./release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --dry-run
           else
-            npm publish "release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --provenance
+            npm publish "./release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --provenance
           fi
       - name: Test the public npm installation
         if: env.DRY_RUN != 'true'
