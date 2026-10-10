@@ -28,10 +28,22 @@ def wait(description, check, timeout=45):
             automation_error = error
             time.sleep(.5)
             continue
+        if dismiss_anr(last): continue
         found = check(last)
         if isinstance(found, ET.Element) or found: return found
         time.sleep(.2)
     raise AssertionError(description + ': ' + str([n.attrib.get('text') for n in last]) + ' automation error: ' + str(automation_error))
+
+def tap(node):
+    x1, y1, x2, y2 = map(int, re.findall(r'\d+', node.get('bounds')))
+    adb('shell', 'input', 'tap', str((x1+x2)//2), str((y1+y2)//2))
+
+def dismiss_anr(items):
+    # Cold CI emulators can show a system "isn't responding" dialog (e.g. the launcher) over the app.
+    if not any("isn't responding" in n.get('text', '') for n in items): return False
+    button = next((n for n in items if n.get('text', '').lower() == 'wait'), None)
+    if button is not None: tap(button); time.sleep(1)
+    return button is not None
 
 def label(items, name):
     return next((n.get('text', '') for n in items if n.get('content-desc') == name), '')
@@ -41,8 +53,7 @@ def ready():
 
 def run():
     item = wait('run button', lambda items: next((n for n in items if n.get('class') == 'android.widget.Button' and n.get('text', '').lower() == 'run task' and n.get('enabled') == 'true'), None))
-    x1, y1, x2, y2 = map(int, re.findall(r'\d+', item.get('bounds')))
-    adb('shell', 'input', 'tap', str((x1+x2)//2), str((y1+y2)//2))
+    tap(item)
 
 def launch():
     adb('shell', 'am', 'start', '-W', '-n', COMPONENT)
