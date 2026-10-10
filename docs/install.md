@@ -1,6 +1,6 @@
 # Install Pi WASM Kit
 
-Pi WASM Kit is an **SDK with runnable examples**. The release contains an npm-compatible tarball and brand assets. There is no global CLI, desktop installer, App Store/TestFlight build, or Play Store APK.
+Pi WASM Kit is an **SDK with runnable examples**. Install the SDK from npm. GitHub releases also contain an npm-compatible tarball and brand assets. There is no global CLI, desktop installer, App Store/TestFlight build, or Play Store APK.
 
 | Where you want to run it | Install / launch | Requirements |
 | --- | --- | --- |
@@ -16,10 +16,10 @@ Node/browser checks run on macOS and Linux. Windows commands are provided for st
 Install [Node.js](https://nodejs.org/en/download) and check `node --version` is at least 22.19. From an existing application's directory, run this same command on macOS, Linux, or Windows PowerShell:
 
 ```sh
-npm install https://github.com/leepokai/pi-wasm-kit/releases/download/v0.2.0/pi-wasm-kit-0.2.0.tgz
+npm install pi-wasm-kit
 ```
 
-The package is **not on the npm registry**. Use the release URL above, not `npm install pi-wasm-kit`. For a new application run `npm init -y` first. No Rust, QuickJS compiler, Xcode or Android SDK is needed to consume the JavaScript SDK.
+For a pinned version, use `npm install pi-wasm-kit@0.2.0`. For a new application run `npm init -y` first. No Rust, QuickJS compiler, Xcode or Android SDK is needed to consume the JavaScript SDK.
 
 Verify the installed exports:
 
@@ -57,7 +57,7 @@ npm run dev
 
 Open the URL printed by Vite. Use the deterministic demo without an API key. Click **Run**, **Interrupt runtime**, then **Reopen & resume**. The browser executes WASM; its IndexedDB stores the journal. It resumes when the page runs again.
 
-For embedding in your own Vite/bundler application, install the SDK tarball as above and use `pi-wasm-kit/browser` in a Worker. Refer to [`examples/browser`](../examples/browser) for the full bridge. Do not load this Node-style package through an unbundled `<script>` tag or open `index.html` through `file://`.
+For embedding in your own Vite/bundler application, install the SDK from npm as above and use `pi-wasm-kit/browser` in a Worker. Refer to [`examples/browser`](../examples/browser) for the full bridge. Do not load this Node-style package through an unbundled `<script>` tag or open `index.html` through `file://`.
 
 ## Shared setup for mobile examples
 
@@ -142,7 +142,7 @@ Run these in the same terminal where the variables were set. With multiple conne
 
 | Symptom | Check |
 | --- | --- |
-| `npm install pi-wasm-kit` returns 404 | Use the versioned GitHub tarball URL; it is not registry-published |
+| `npm install pi-wasm-kit` returns 404 | Check `npm config get registry`; use `https://registry.npmjs.org/` or the GitHub release tarball if your registry mirror has not synced |
 | Blank mobile page / connection refused | Keep the preview server on port 4173; Android additionally needs `adb reverse` |
 | Web Locks unavailable | Use HTTPS or loopback, not a plain HTTP LAN address |
 | Android reports no SDK / wrong Java | Check `ANDROID_HOME`, SDK Platform 35 and `JAVA_HOME` |

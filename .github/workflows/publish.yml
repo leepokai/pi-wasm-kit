@@ -1,0 +1,87 @@
+name: Publish npm
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Validate publishing without uploading a version
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'leepokai/pi-wasm-kit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Check package and release tag
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          import assert from 'node:assert/strict';
+          const pkg = JSON.parse(readFileSync('package.json'));
+          const lock = JSON.parse(readFileSync('package-lock.json'));
+          assert.equal(pkg.name, 'pi-wasm-kit');
+          assert.equal(lock.version, pkg.version);
+          assert.equal(lock.packages[''].version, pkg.version);
+          if (process.env.DRY_RUN !== 'true') {
+            assert.equal(process.env.GITHUB_REF, `refs/tags/v${pkg.version}`, 'Publish from a matching version tag');
+          }
+          appendFileSync(process.env.GITHUB_ENV, `PACKAGE_VERSION=${pkg.version}\nDIST_TAG=${pkg.version.includes('-') ? 'next' : 'latest'}\n`);
+          JS
+      - run: npm ci
+      - run: npm test
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build:demo
+      - run: npm run test:e2e
+      - name: Pack and test the exact release archive
+        run: |
+          mkdir -p release
+          npm pack --pack-destination release
+          node scripts/package-smoke.mjs "release/pi-wasm-kit-${PACKAGE_VERSION}.tgz"
+      - name: Publish archive
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            npm whoami
+            npm publish "release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --dry-run
+          else
+            npm publish "release/pi-wasm-kit-${PACKAGE_VERSION}.tgz" --access public --tag "$DIST_TAG" --ignore-scripts --provenance
+          fi
+      - name: Test the public npm installation
+        if: env.DRY_RUN != 'true'
+        run: |
+          for attempt in $(seq 1 12); do
+            if npm view "pi-wasm-kit@${PACKAGE_VERSION}" version; then
+              node scripts/package-smoke.mjs "pi-wasm-kit@${PACKAGE_VERSION}"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Published version is not yet available from npm' >&2
+          exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: npm-release
+          path: release/*.tgz

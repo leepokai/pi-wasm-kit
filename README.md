@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logos/export/logo-192.png" width="112" height="112" alt="Pi WASM Kit — continuation pi icon">
+  <img src="https://raw.githubusercontent.com/leepokai/pi-wasm-kit/main/logos/export/logo-192.png" width="112" height="112" alt="Pi WASM Kit — continuation pi icon">
 </p>
 <h1 align="center">Pi WASM Kit</h1>
 <p align="center"><strong>Durable agents. A portable runtime.</strong><br>Run Pi in WebAssembly. Pick up from the last committed checkpoint.</p>
@@ -12,6 +12,7 @@
   <a href="examples/android"><img alt="Android example" src="https://img.shields.io/badge/ANDROID-EXAMPLE-91ad60?style=for-the-badge&logo=android&logoColor=white&labelColor=22271f"></a>
 </p>
 <p align="center">
+  <a href="https://www.npmjs.com/package/pi-wasm-kit"><img alt="npm version" src="https://img.shields.io/npm/v/pi-wasm-kit?color=627d3c"></a>
   <a href="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/leepokai/pi-wasm-kit/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/leepokai/pi-wasm-kit/actions/workflows/mobile.yml"><img alt="Mobile examples CI" src="https://github.com/leepokai/pi-wasm-kit/actions/workflows/mobile.yml/badge.svg"></a>
   <a href="https://github.com/leepokai/pi-wasm-kit/releases"><img alt="Release including experimental prereleases" src="https://img.shields.io/github/v/release/leepokai/pi-wasm-kit?include_prereleases&color=627d3c"></a>
@@ -28,7 +29,7 @@
 <p align="center">Open source · MIT licensed · Experimental<br>
 Inspired by <a href="https://github.com/finnvoor/PiDurableKit">PiDurableKit</a> by <a href="https://github.com/finnvoor">Finn Voorhees</a>.</p>
 
-![Browser playground](docs/playground.png)
+![Browser playground](https://raw.githubusercontent.com/leepokai/pi-wasm-kit/main/docs/playground.png)
 
 The **actual upstream Pi Durable engine** runs inside QuickJS WASM. The host supplies a model transport, an exclusive durable journal, and explicitly granted tools. Stop the process or terminate the Worker, reopen the same journal, and Pi resumes unfinished tasks from committed checkpoints.
 
@@ -40,13 +41,13 @@ This is an independent project inspired by PiDurableKit’s Apple embedding desi
 
 | Platform | Get started |
 | --- | --- |
-| macOS / Windows / Linux · Node.js | [Install the SDK tarball](docs/install.md#nodejs-sdk) |
+| macOS / Windows / Linux · Node.js | [Install the SDK from npm](docs/install.md#nodejs-sdk) |
 | Browser | [Run the playground](docs/install.md#browser-playground) |
 | iOS 26+ | [Build the Swift example](docs/install.md#ios) on macOS |
 | Android API 26+ | [Build and install the Android example](docs/install.md#android) |
 
 ```sh
-npm install https://github.com/leepokai/pi-wasm-kit/releases/download/v0.2.0/pi-wasm-kit-0.2.0.tgz
+npm install pi-wasm-kit
 ```
 
 Requires Node.js 22.19+. This installs an SDK in your application, not a desktop/mobile app or a global CLI. See the [platform installation guide](docs/install.md) for prerequisites, Windows PowerShell commands, device setup and checksums.
@@ -91,7 +92,7 @@ node examples/node/chat.mjs 'Hello from WASM'
 
 ## Use the SDK
 
-Build a package with `npm pack`, then install the generated `.tgz` into your application. The GitHub release also contains the tarball. **This package has not been published to the npm registry.**
+Install from [npm](https://www.npmjs.com/package/pi-wasm-kit) with `npm install pi-wasm-kit`. For an exact version, use `npm install pi-wasm-kit@0.2.0`. You can also build from source with `npm pack`, or install the tarball from the GitHub release.
 
 ```ts
 import { PiWasmAgent } from 'pi-wasm-kit';
@@ -204,3 +205,7 @@ Tests use synthetic model responses and a local HTTP fixture. They do not requir
 - Executes JavaScript using [quickjs-emscripten](https://github.com/justjake/quickjs-emscripten) and [QuickJS](https://bellard.org/quickjs/).
 
 This project is MIT licensed. See [LICENSE](LICENSE), [NOTICE](NOTICE), and [third-party notices](third-party/README.md). Builds include `dist/licenses` with the license texts for bundled dependencies. Upstream licenses remain applicable.
+
+## Publishing
+
+Maintainers: see [npm publishing and token rotation](docs/publishing.md) for the dedicated GitHub Actions release workflow.
