@@ -25,3 +25,17 @@ test('HTTP model → WASM Pi → host tool → HTTP model → journal; credentia
   const {readFile}=await import('node:fs/promises');assert(!(await readFile(join(dir,'log'),'utf8')).includes('test-only-secret'));
   assert.equal(await a.evaluate('return typeof process;'),'undefined');await a.close();
 });
+
+test('HTTP adapter accepts empty tool-call arguments and reports error bodies',async t=>{
+  let calls=0;
+  const server=createServer(async(req,res)=>{
+    for await(const _ of req);calls++;
+    if(calls===2){res.writeHead(429);res.end('rate limited');return;}
+    res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({choices:[{finish_reason:'tool_calls',message:{content:null,tool_calls:[{id:'c',type:'function',function:{name:'ping',arguments:''}}]}}]}));
+  });await new Promise(r=>server.listen(0,'127.0.0.1',r));
+  t.after(async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));});
+  const model=openAICompatible({baseURL:`http://127.0.0.1:${server.address().port}/v1`,model:'test'});
+  const first=await model({context:{messages:[]}},AbortSignal.timeout(5000),()=>{});
+  assert.deepEqual(first.content[0].arguments,{});
+  await assert.rejects(model({context:{messages:[]}},AbortSignal.timeout(5000),()=>{}),/HTTP 429 rate limited/);
+});

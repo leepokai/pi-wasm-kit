@@ -18,12 +18,12 @@ export function openAICompatible(options: { baseURL: string; model: string; apiK
       body: JSON.stringify({ model: options.model, messages, ...(tools.length ? { tools } : {}), stream: false }),
       signal: AbortSignal.any([signal, AbortSignal.timeout(options.timeoutMs ?? 60000)]),
     });
-    if (!response.ok) throw new Error(`Model request failed: HTTP ${response.status}`);
+    if (!response.ok) throw new Error(`Model request failed: HTTP ${response.status} ${(await response.text().catch(() => '')).slice(0, 500)}`.trim());
     const data: any = await response.json(); const choice = data.choices?.[0];
     if (!choice?.message) throw new Error('Model returned no assistant message');
     const content: any[] = [];
     if (choice.message.content) content.push({ type: 'text', text: choice.message.content });
-    for (const call of choice.message.tool_calls ?? []) content.push({ type: 'toolCall', id: call.id, name: call.function.name, arguments: JSON.parse(call.function.arguments) });
+    for (const call of choice.message.tool_calls ?? []) content.push({ type: 'toolCall', id: call.id, name: call.function.name, arguments: call.function.arguments ? JSON.parse(call.function.arguments) : {} });
     return { role: 'assistant', content, api: 'host', provider: 'host', model: options.model, stopReason: content.some(x => x.type === 'toolCall') ? 'toolUse' : choice.finish_reason === 'length' ? 'length' : 'stop', usage: { input: data.usage?.prompt_tokens ?? 0, output: data.usage?.completion_tokens ?? 0, totalTokens: data.usage?.total_tokens ?? 0, cacheRead: 0, cacheWrite: 0, cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: 0 } }, timestamp: Date.now() };
   };
 }

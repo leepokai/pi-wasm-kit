@@ -26,16 +26,16 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
-    "@earendil-works/chord": "1.1.0",
     "@earendil-works/pi-ai": "1.1.0",
     "@earendil-works/pi-durable": "1.1.0",
     "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
-    "abort-controller": "3.0.0",
     "quickjs-emscripten-core": "0.32.0"
   },
   "devDependencies": {
+    "@earendil-works/chord": "1.1.0",
     "@playwright/test": "1.64.0",
     "@types/node": "26.6.4",
+    "abort-controller": "3.0.0",
     "esbuild": "0.28.2",
     "typescript": "7.0.2",
     "vite": "8.3.4"
@@ -45,6 +45,9 @@
   },
   "files": [
     "dist",
+    "!dist/guest.js",
+    "!dist/guest-meta.json",
+    "!dist/guest",
     "LICENSE",
     "NOTICE"
   ],
