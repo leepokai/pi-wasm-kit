@@ -44,7 +44,7 @@ To validate on `main` without uploading a version:
 gh workflow run publish.yml --repo leepokai/pi-wasm-kit --ref main -f dry_run=true
 ```
 
-A dry run verifies token authentication, runs the full build/test/package path, and calls `npm publish --dry-run`. It does not prove that npm will accept a real write; the first tagged release verifies that. A non-dry-run dispatch must run against a matching version tag.
+A dry run verifies token authentication, runs the full build/test/package path, and calls `npm publish --dry-run --force`. The dry-run-only `--force` skips npm's duplicate-version preflight so maintainers can rehearse an already published version; it never uploads. Actual releases do not use `--force`. It does not prove that npm will accept a real write; the first tagged release verifies that. A non-dry-run dispatch must run against a matching version tag.
 
 ## Move to Trusted Publishing
 
