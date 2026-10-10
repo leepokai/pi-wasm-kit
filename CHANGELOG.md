@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- OpenAI adapter: accept empty tool-call `arguments` (returned by some compatible providers for zero-argument tools) and include up to 500 bytes of the response body in HTTP errors.
+- Package: stop shipping the duplicate guest bundle, esbuild metafile and unused guest declarations (2.5 MB → 1.0 MB unpacked). Bundled-only `abort-controller` and `@earendil-works/chord` move to devDependencies.
+- CI: test on Node.js 22.19 (lowest supported) and 24; pin publish workflow actions to commit SHAs; add Dependabot and a security policy.
+
 ## 0.2.0 — Experimental
 
 - Add Swift/iOS and Java/Android WebView examples with native tools and process-recovery E2E.
