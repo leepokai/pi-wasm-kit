@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm }
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with: { distribution: temurin, java-version: 21 }
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
         with:
           packages: platform-tools platforms;android-35 build-tools;35.0.0
           log-accepted-android-sdk-licenses: false
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - run: npm ci && npm run build:demo
       - run: ./gradlew :app:assembleDebug :app:lintDebug
         working-directory: examples/android
@@ -43,8 +43,8 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm }
       - name: Select Xcode 26
         run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
@@ -56,7 +56,7 @@ jobs:
           npm run preview -- --port 4173 --strictPort > /tmp/preview.log 2>&1 &
           simulator=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for runtime,devices in d["devices"].items() if "iOS-26" in runtime for x in devices if "iPhone" in x["name"]))')
           xcodebuild test -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$simulator" -derivedDataPath examples/ios/build/dd
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: ios-test-results
