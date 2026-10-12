@@ -129,7 +129,11 @@ test('streamed model updates reach committed Pi event batches',async t=>{
     const partial={...answer(''),content:[{type:'text',text:''}]};
     emit({type:'start',partial});emit({type:'text_start',contentIndex:0,partial});
     partial.content[0].text='Hello';emit({type:'text_delta',contentIndex:0,delta:'Hello',partial});
-    await new Promise(r=>setTimeout(r,40));partial.content[0].text='Hello streamed';emit({type:'text_delta',contentIndex:0,delta:' streamed',partial});await new Promise(r=>setTimeout(r,40));return answer('Hello streamed');
+    // The first partial commits as message_start; only a later delta commits a message_update. Wait for each commit
+    // instead of sleeping: with a slow fsync, fixed sleeps let the second partial fold into the final message.
+    await until(()=>events.some(e=>e.type==='message_start'&&e.message?.role==='assistant'));
+    partial.content[0].text='Hello streamed';emit({type:'text_delta',contentIndex:0,delta:' streamed',partial});
+    await until(()=>events.some(e=>e.type==='message_update'));return answer('Hello streamed');
   }});
   await a.wait((await a.submit('stream')).id);assert(events.some(e=>e.type==='message_update'));await a.close();
 });
