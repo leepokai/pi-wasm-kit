@@ -52,8 +52,19 @@ def ready():
     wait('runtime ready', lambda items: 'Ready' in label(items, 'runtimeStatus'))
 
 def run():
-    item = wait('run button', lambda items: next((n for n in items if n.get('class') == 'android.widget.Button' and n.get('text', '').lower() == 'run task' and n.get('enabled') == 'true'), None))
-    tap(item)
+    # An `input tap` on a busy emulator is occasionally dropped; tap again only if no run started.
+    for attempt in range(3):
+        before = {}
+        def enabled(items):
+            before['result'] = label(items, 'runtimeResult')
+            return next((n for n in items if n.get('class') == 'android.widget.Button' and n.get('text', '').lower() == 'run task' and n.get('enabled') == 'true'), None)
+        tap(wait('run button', enabled))
+        try:
+            wait('run started', lambda items: 'Running' in label(items, 'runtimeStatus') or label(items, 'runtimeResult') != before['result'], timeout=15)
+            return
+        except AssertionError:
+            print(f'Run tap {attempt + 1} did not start a task; tapping again', flush=True)
+    raise AssertionError('Run task did not start after 3 taps')
 
 def launch():
     adb('shell', 'am', 'start', '-W', '-n', COMPONENT)
