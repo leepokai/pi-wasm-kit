@@ -40,49 +40,63 @@ jobs:
             adb install -r examples/android/app/build/outputs/apk/debug/app-debug.apk
             python3 examples/android/test/recovery.py
   ios:
-    runs-on: macos-15
-    timeout-minutes: 40
+    # iOS 26 simulators can hang at "Waiting on BackBoard" on macos-15 VMs
+    # (actions/runner-images#12777); macOS 26 hosts with newer Xcode are far more reliable.
+    runs-on: macos-26
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with: { node-version: 24, cache: npm }
-      - name: Select Xcode 26
-        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+      - run: xcodebuild -version
       - run: brew install xcodegen
       - run: npm ci && npm run build:demo
       - run: xcodegen generate --spec examples/ios/project.yml
       - name: Build for testing
         run: |
-          simulator=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for runtime,devices in d["devices"].items() if "iOS-26" in runtime for x in devices if "iPhone" in x["name"]))')
+          # Newest installed iOS 26.x runtime.
+          simulator=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          devices = json.load(sys.stdin)["devices"]
+          runtimes = sorted((tuple(map(int, re.findall(r"\d+", r.split("iOS-")[1]))), r) for r in devices if "iOS-26" in r)
+          print(next(d["udid"] for _, r in reversed(runtimes) for d in devices[r] if "iPhone" in d["name"]))')
           echo "SIMULATOR=$simulator" >> "$GITHUB_ENV"
+          xcrun simctl list devices | grep "$simulator"
           xcodebuild build-for-testing -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$simulator" -derivedDataPath examples/ios/build/dd
-      # Booting inside `xcodebuild test` occasionally hangs on hosted runners with no output
-      # until the job timeout. Boot explicitly so a stuck boot fails here, quickly and visibly.
-      - name: Boot simulator
-        timeout-minutes: 8
-        run: xcrun simctl bootstatus "$SIMULATOR" -b
-      - name: Run simulator lifecycle and UI tests
-        timeout-minutes: 20
+      - name: Boot simulator and run lifecycle and UI tests
+        timeout-minutes: 32
         run: |
-          npm run preview -- --port 4173 --strictPort > /tmp/preview.log 2>&1 &
-          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173 >/dev/null && break || sleep 1; done
-          run_tests() {
-            xcodebuild test-without-building -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$SIMULATOR" -derivedDataPath examples/ios/build/dd &
-            local pid=$!
-            ( sleep 480; kill -TERM "$pid" 2>/dev/null ) &
-            local watchdog=$!
-            local status=0
-            wait "$pid" || status=$?
+          # Run a command, sending SIGTERM (exit 143) if it has not finished after $1 seconds.
+          with_timeout() {
+            local seconds=$1; shift
+            "$@" & local pid=$!
+            ( sleep "$seconds"; kill -TERM "$pid" 2>/dev/null ) & local watchdog=$!
+            local status=0; wait "$pid" || status=$?
             kill "$watchdog" 2>/dev/null || true
             return "$status"
           }
+          boot() {
+            for attempt in 1 2 3; do
+              with_timeout 240 xcrun simctl bootstatus "$SIMULATOR" -b && return 0
+              echo "::warning::Simulator boot attempt $attempt stalled; erasing and retrying"
+              xcrun simctl shutdown "$SIMULATOR" || true
+              xcrun simctl erase "$SIMULATOR" || true
+            done
+            return 1
+          }
+          run_tests() {
+            with_timeout 480 xcodebuild test-without-building -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$SIMULATOR" -derivedDataPath examples/ios/build/dd
+          }
+          npm run preview -- --port 4173 --strictPort > /tmp/preview.log 2>&1 &
+          for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173 >/dev/null && break || sleep 1; done
+          boot
           status=0; run_tests || status=$?
-          # Retry once only when the watchdog killed a hung run (SIGTERM = 143), never on a test failure.
+          # Retry once only when the watchdog stopped a hung run, never after a test failure.
           if [ "$status" -eq 143 ]; then
             echo "::warning::xcodebuild produced no result in 8 minutes; rebooting the simulator and retrying once"
             xcrun simctl shutdown "$SIMULATOR" || true
             xcrun simctl uninstall "$SIMULATOR" com.leepokai.piwasm.example 2>/dev/null || true
-            xcrun simctl bootstatus "$SIMULATOR" -b
+            boot
             status=0; run_tests || status=$?
           fi
           exit "$status"
