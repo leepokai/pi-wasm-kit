@@ -43,7 +43,7 @@ jobs:
     # iOS 26 simulators can hang at "Waiting on BackBoard" on macos-15 VMs
     # (actions/runner-images#12777); macOS 26 hosts with newer Xcode are far more reliable.
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -64,7 +64,7 @@ jobs:
           xcrun simctl list devices | grep "$simulator"
           xcodebuild build-for-testing -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$simulator" -derivedDataPath examples/ios/build/dd
       - name: Boot simulator and run lifecycle and UI tests
-        timeout-minutes: 32
+        timeout-minutes: 40
         run: |
           # Run a command, sending SIGTERM (exit 143) if it has not finished after $1 seconds.
           with_timeout() {
@@ -85,7 +85,7 @@ jobs:
             return 1
           }
           run_tests() {
-            with_timeout 480 xcodebuild test-without-building -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$SIMULATOR" -derivedDataPath examples/ios/build/dd
+            with_timeout 600 xcodebuild test-without-building -project examples/ios/PiWasmExample.xcodeproj -scheme PiWasmExample -destination "platform=iOS Simulator,id=$SIMULATOR" -derivedDataPath examples/ios/build/dd
           }
           npm run preview -- --port 4173 --strictPort > /tmp/preview.log 2>&1 &
           for n in $(seq 1 30); do curl -fsS http://127.0.0.1:4173 >/dev/null && break || sleep 1; done
@@ -93,7 +93,7 @@ jobs:
           status=0; run_tests || status=$?
           # Retry once only when the watchdog stopped a hung run, never after a test failure.
           if [ "$status" -eq 143 ]; then
-            echo "::warning::xcodebuild produced no result in 8 minutes; rebooting the simulator and retrying once"
+            echo "::warning::xcodebuild produced no result in 10 minutes; rebooting the simulator and retrying once"
             xcrun simctl shutdown "$SIMULATOR" || true
             xcrun simctl uninstall "$SIMULATOR" com.leepokai.piwasm.example 2>/dev/null || true
             boot
