@@ -27,7 +27,7 @@
   "type": "module",
   "dependencies": {
     "@earendil-works/pi-ai": "1.1.0",
-    "@earendil-works/pi-durable": "1.1.0",
+    "@earendil-works/pi-durable": "1.2.0",
     "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
     "quickjs-emscripten-core": "0.32.0"
   },
